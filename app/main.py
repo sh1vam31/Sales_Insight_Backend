@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+from app.database import init_db
 
 
 @asynccontextmanager
@@ -7,12 +10,15 @@ async def lifespan(app: FastAPI):
     """
     Application lifespan handler.
 
-    Use this to initialize shared resources (DB, clients, etc.)
+    Used to initialize shared resources (DB, clients, etc.)
     and clean them up on shutdown.
     """
-    # TODO: Initialize resources here (e.g., DB connection pool)
+    # Application startup logic
+    await init_db()
+
     yield
-    # TODO: Clean up resources here
+
+    # Application shutdown logic (cleanup) can be added here.
 
 
 app = FastAPI(
