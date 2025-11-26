@@ -5,4 +5,7 @@ These schemas will be used to validate and serialize sales data
 and analytics responses exposed via the API.
 """
 
+from app.schemas.sale import SaleCreate, SaleResponse, SaleUpdate
+
+__all__ = ["SaleCreate", "SaleUpdate", "SaleResponse"]
 

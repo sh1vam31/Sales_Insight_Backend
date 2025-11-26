@@ -1,8 +1,10 @@
 """
 SQLAlchemy ORM models for the Sales Insights Backend.
 
-The core `Sale` model (id, product, quantity, price, date) will be added here
-based on the project requirements.
+This module exports all database models for use throughout the application.
 """
 
+from app.models.sale import Sale
+
+__all__ = ["Sale"]
 
