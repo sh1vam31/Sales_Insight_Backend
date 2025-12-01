@@ -7,4 +7,6 @@ Service functions here will encapsulate operations such as:
 - Identifying best-selling products
 """
 
+# The sales_service module can be imported directly:
+# from app.services import sales_service
 
