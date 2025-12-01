@@ -10,22 +10,18 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import declarative_base
 
+import os
+
 # NOTE:
-# We default to a local SQLite database for development.
-# In production (e.g., Render), a DATABASE_URL environment variable
-# can be provided (typically pointing to PostgreSQL).
-DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./sales_insights.db"
+# For initial development, we use a local SQLite database via aiosqlite.
+# For production deployment (e.g., Render), use PostgreSQL via DATABASE_URL env var.
+# Render automatically provides DATABASE_URL for PostgreSQL instances.
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./sales_insights.db")
 
-raw_database_url = os.getenv("DATABASE_URL", DEFAULT_SQLITE_URL)
-
-url = make_url(raw_database_url)
-
-# If we're using PostgreSQL without an explicit async driver, upgrade it
-# to use asyncpg so that SQLAlchemy's asyncio extension works.
-if url.drivername in ("postgresql", "postgres"):
-    url = url.set(drivername="postgresql+asyncpg")
-
-DATABASE_URL = str(url)
+# Render provides postgres:// URLs, but SQLAlchemy requires postgresql://
+# This handles the conversion automatically
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
 
 # SQLAlchemy 2.0 style declarative base
 Base = declarative_base()
