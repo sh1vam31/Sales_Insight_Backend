@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: sales-insights-backend
+    env: python
+
+    # Build step: install dependencies
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+
+    # Start the FastAPI app with Uvicorn
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.0
+      # For this project we use a local SQLite file. On Render this will be
+      # ephemeral storage suitable for demos and small projects.
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./sales_insights.db
+
+

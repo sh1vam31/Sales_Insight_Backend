@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables / config
+.env
+.env.*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS metadata
+.DS_Store
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+logs/
+*.log
+
+# SQLite database files (optional: keep if you want sample data in repo)
+sales_insights.db
+
+# Coverage / test artifacts
+.coverage
+htmlcov/
+pytest.cache/
+
+
