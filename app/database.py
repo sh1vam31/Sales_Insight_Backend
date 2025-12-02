@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+import os
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -9,16 +10,30 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import declarative_base
 
 # NOTE:
-# For initial development, we use a local SQLite database via aiosqlite.
-# This can be replaced with a production-grade database URL
-# (e.g., PostgreSQL) via environment variables or a settings module later.
-DATABASE_URL = "sqlite+aiosqlite:///./sales_insights.db"
+# We default to a local SQLite database for development.
+# In production (e.g., Render), a DATABASE_URL environment variable
+# can be provided (typically pointing to PostgreSQL).
+DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./sales_insights.db"
+
+raw_database_url = os.getenv("DATABASE_URL", DEFAULT_SQLITE_URL)
+
+# Convert PostgreSQL URLs to use asyncpg driver for async SQLAlchemy
+# Render provides URLs like: postgres://user:pass@host/db
+# We need: postgresql+asyncpg://user:pass@host/db
+if raw_database_url.startswith("postgres://"):
+    # Replace postgres:// with postgresql+asyncpg://
+    DATABASE_URL = raw_database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif raw_database_url.startswith("postgresql://") and "+asyncpg" not in raw_database_url:
+    # Replace postgresql:// with postgresql+asyncpg:// if not already present
+    DATABASE_URL = raw_database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+else:
+    # Keep as-is (SQLite or already has async driver)
+    DATABASE_URL = raw_database_url
 
 # SQLAlchemy 2.0 style declarative base
 Base = declarative_base()
 
 # Global async engine and session factory.
-# In a larger app you might construct these from a settings module.
 engine: AsyncEngine = create_async_engine(
     DATABASE_URL,
     echo=False,

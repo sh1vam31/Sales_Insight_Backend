@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.database import init_db
+from app.routes import api_router
 
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(api_router)
 
 @app.get("/", tags=["Health"])
 async def root():
