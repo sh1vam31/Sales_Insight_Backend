@@ -1,13 +1,12 @@
 from collections.abc import AsyncGenerator
 import os
 
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
+
+# Load variables from a local .env file if present (development convenience)
+load_dotenv()
 
 # NOTE:
 # We default to a local SQLite database for development.
