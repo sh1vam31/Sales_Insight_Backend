@@ -14,7 +14,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.sale import SaleCreate, SaleResponse, SaleUpdate
+from app.schemas.sale import (
+    ItemsSoldResponse,
+    RevenueResponse,
+    SaleCreate,
+    SaleResponse,
+    SaleUpdate,
+)
 from app.services import sales_service
 
 router = APIRouter(prefix="/api/sales", tags=["Sales"])
@@ -101,5 +107,57 @@ async def delete_sale_endpoint(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sale not found")
     # 204 No Content responses should not include a body
     return None
+
+
+@router.get(
+    "/analytics/revenue",
+    response_model=RevenueResponse,
+    summary="Get total revenue",
+)
+async def get_total_revenue_endpoint(
+    start_date: Optional[date] = Query(None, description="Filter sales from this date (inclusive)"),
+    end_date: Optional[date] = Query(None, description="Filter sales up to this date (inclusive)"),
+    product_name: Optional[str] = Query(None, description="Filter sales for a specific product"),
+    db: AsyncSession = Depends(get_db),
+) -> RevenueResponse:
+    """
+    Calculate total revenue (sum of quantity * price) for sales.
+    Supports optional filtering by date range and product name.
+    """
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "product_name": product_name,
+    }
+    # Remove None values to avoid unnecessary filters
+    filters = {key: value for key, value in filters.items() if value is not None}
+    total_revenue = await sales_service.get_total_revenue(db, filters)
+    return RevenueResponse(total_revenue=total_revenue)
+
+
+@router.get(
+    "/analytics/items-sold",
+    response_model=ItemsSoldResponse,
+    summary="Get total items sold",
+)
+async def get_total_items_sold_endpoint(
+    start_date: Optional[date] = Query(None, description="Filter sales from this date (inclusive)"),
+    end_date: Optional[date] = Query(None, description="Filter sales up to this date (inclusive)"),
+    product_name: Optional[str] = Query(None, description="Filter sales for a specific product"),
+    db: AsyncSession = Depends(get_db),
+) -> ItemsSoldResponse:
+    """
+    Calculate total items sold (sum of quantities) for sales.
+    Supports optional filtering by date range and product name.
+    """
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "product_name": product_name,
+    }
+    # Remove None values to avoid unnecessary filters
+    filters = {key: value for key, value in filters.items() if value is not None}
+    total_items = await sales_service.get_total_items_sold(db, filters)
+    return ItemsSoldResponse(total_items_sold=total_items)
 
 

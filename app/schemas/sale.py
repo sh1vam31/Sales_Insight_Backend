@@ -140,3 +140,43 @@ class SaleResponse(SaleBase):
         },
     )
 
+
+class RevenueResponse(BaseModel):
+    """
+    Schema for total revenue analytics response.
+    """
+
+    total_revenue: Decimal = Field(
+        ...,
+        description="Total revenue across all sales (sum of quantity * price)",
+        examples=[12500.50, 9999.99],
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "total_revenue": 12500.50,
+            }
+        }
+    )
+
+
+class ItemsSoldResponse(BaseModel):
+    """
+    Schema for total items sold analytics response.
+    """
+
+    total_items_sold: int = Field(
+        ...,
+        description="Total number of items sold across all sales (sum of quantities)",
+        examples=[150, 250],
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "total_items_sold": 150,
+            }
+        }
+    )
+

@@ -10,7 +10,9 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Dict, Iterable, List, Optional
 
-from sqlalchemy import select
+from decimal import Decimal
+
+from sqlalchemy import func, select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -116,5 +118,75 @@ async def delete_sale(db: AsyncSession, sale_id: int) -> bool:
     await db.delete(sale)
     await db.commit()
     return True
+
+
+async def get_total_revenue(
+    db: AsyncSession,
+    filters: Optional[Dict[str, Any]] = None,
+) -> Decimal:
+    """
+    Calculate total revenue (sum of quantity * price) for sales.
+
+    Supported filters:
+        - start_date (date): inclusive lower bound for sale_date
+        - end_date (date): inclusive upper bound for sale_date
+        - product_name (str): exact match on product name
+
+    Returns:
+        Decimal: Total revenue across matching sales
+    """
+    filters = filters or {}
+    query = select(func.sum(Sale.quantity * Sale.price))
+
+    start_date: Optional[date] = filters.get("start_date")
+    end_date: Optional[date] = filters.get("end_date")
+    product_name: Optional[str] = filters.get("product_name")
+
+    if start_date:
+        query = query.where(Sale.sale_date >= start_date)
+    if end_date:
+        query = query.where(Sale.sale_date <= end_date)
+    if product_name:
+        query = query.where(Sale.product_name == product_name)
+
+    result = await db.execute(query)
+    total = result.scalar()
+    # Return 0 if no sales match the filters
+    return Decimal("0.00") if total is None else Decimal(str(total))
+
+
+async def get_total_items_sold(
+    db: AsyncSession,
+    filters: Optional[Dict[str, Any]] = None,
+) -> int:
+    """
+    Calculate total items sold (sum of quantities) for sales.
+
+    Supported filters:
+        - start_date (date): inclusive lower bound for sale_date
+        - end_date (date): inclusive upper bound for sale_date
+        - product_name (str): exact match on product name
+
+    Returns:
+        int: Total number of items sold across matching sales
+    """
+    filters = filters or {}
+    query = select(func.sum(Sale.quantity))
+
+    start_date: Optional[date] = filters.get("start_date")
+    end_date: Optional[date] = filters.get("end_date")
+    product_name: Optional[str] = filters.get("product_name")
+
+    if start_date:
+        query = query.where(Sale.sale_date >= start_date)
+    if end_date:
+        query = query.where(Sale.sale_date <= end_date)
+    if product_name:
+        query = query.where(Sale.product_name == product_name)
+
+    result = await db.execute(query)
+    total = result.scalar()
+    # Return 0 if no sales match the filters
+    return 0 if total is None else int(total)
 
 
