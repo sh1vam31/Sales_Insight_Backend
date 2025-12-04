@@ -128,8 +128,6 @@ sqlite3 sales_insights.db ".schema sales"
 - Health check endpoint
 - **Deployed to Render** - Production API live at [https://sales-insight-backend.onrender.com](https://sales-insight-backend.onrender.com)
 
-🚧 **In Progress:**
-- Insights/analytics API endpoints (total revenue, best-selling products, etc.)
 
 ### API Endpoints
 
